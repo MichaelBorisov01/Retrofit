@@ -25,12 +25,13 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         jsonPlaceHolderApi = retrofit.create(JsonPlaceHolderApi::class.java)
-        getPost()
+        //getPost()
         //getComments()
+        //createPost()
+        updatePost()
     }
 
     private fun getPost() {
-
         val parameters: MutableMap<String, String> = HashMap()
         parameters["userId"] = "1"
         parameters["_sort"] = "id"
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
                 for (post in posts) {
                     var content = ""
                     content += """
-                               ID: ${post.id}
+                               ID: ${post.getId()}
                                
                                """.trimIndent()
                     content += """
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                                
                                """.trimIndent()
                     content += """
-                               Title: ${post.title}
+                               Title: ${post.getTitle()}
                                
                                """.trimIndent()
                     content += """
@@ -78,8 +79,7 @@ class MainActivity : AppCompatActivity() {
         call!!.enqueue(object : Callback<List<Comment>> {
             @SuppressLint("SetTextI18n")
             override fun onResponse(
-                call: Call<List<Comment>>,
-                response: Response<List<Comment>>
+                call: Call<List<Comment>>, response: Response<List<Comment>>
             ) {
                 if (!response.isSuccessful) {
                     textViewResult!!.text = "Code: " + response.code()
@@ -89,19 +89,19 @@ class MainActivity : AppCompatActivity() {
                 for (comment in comments) {
                     var content = ""
                     content += """
-                               ID: ${comment.id}
+                               ID: ${comment.getId()}
                                
                                """.trimIndent()
                     content += """
-                               Post ID: ${comment.postId}
+                               Post ID: ${comment.getPostId()}
                                
                                """.trimIndent()
                     content += """
-                               Name: ${comment.name}
+                               Name: ${comment.getName()}
                                
                                """.trimIndent()
                     content += """
-                               Email: ${comment.email}
+                               Email: ${comment.getName()}
                                
                                """.trimIndent()
                     content += """
@@ -116,6 +116,100 @@ class MainActivity : AppCompatActivity() {
             @SuppressLint("SetTextI18n")
             override fun onFailure(call: Call<List<Comment>>, t: Throwable) {
                 textViewResult!!.text = "${t.message}"
+            }
+        })
+    }
+
+    private fun createPost() {
+        val post = Post(23, "New Title", "New Text")
+
+        val fields: MutableMap<String, String> = HashMap()
+        fields["userId"] = "25"
+        fields["title"] = "New Title"
+        fields["text"] = "blblbblblbl"
+
+        val call: Call<Post> = jsonPlaceHolderApi!!.createPost(fields)
+
+        call.enqueue(object : Callback<Post> {
+            @SuppressLint("SetTextI18n")
+            override fun onResponse(call: Call<Post?>, response: Response<Post?>) {
+                if (!response.isSuccessful) {
+                    textViewResult!!.text = "Code: " + response.code()
+                    return
+                }
+                val postResponse = response.body()
+                var content = ""
+                content += """
+             Code: ${response.code()}
+             
+             """.trimIndent()
+                content += """
+             ID: ${postResponse!!.getId()}
+             
+             """.trimIndent()
+                content += """
+             User ID: ${postResponse.getUserId()}
+             
+             """.trimIndent()
+                content += """
+             Title: ${postResponse.getTitle().toString()}
+             
+             """.trimIndent()
+                content += """
+             Text: ${postResponse.text}
+             
+             
+             """.trimIndent()
+                textViewResult!!.text = content
+            }
+
+            override fun onFailure(call: Call<Post?>, t: Throwable) {
+                textViewResult!!.text = t.message
+            }
+        })
+    }
+
+
+    private fun updatePost() {
+        val post = Post(12, null, "New Text")
+
+        val call: Call<Post> = jsonPlaceHolderApi!!.putPost(5, post)
+
+        call.enqueue(object : Callback<Post> {
+            @SuppressLint("SetTextI18n")
+            override fun onResponse(call: Call<Post>, response: Response<Post>) {
+                if (!response.isSuccessful) {
+                    textViewResult!!.text = "Code: " + response.code()
+                    return
+                }
+                val postResponse = response.body()
+                var content = ""
+                content += """
+             Code: ${response.code()}
+             
+             """.trimIndent()
+                content += """
+             ID: ${postResponse!!.getId()}
+             
+             """.trimIndent()
+                content += """
+             User ID: ${postResponse.getUserId()}
+             
+             """.trimIndent()
+                content += """
+             Title: ${postResponse.getTitle().toString()}
+             
+             """.trimIndent()
+                content += """
+             Text: ${postResponse.text}
+             
+             
+             """.trimIndent()
+                textViewResult!!.text = content
+            }
+
+            override fun onFailure(call: Call<Post>, t: Throwable) {
+                textViewResult!!.text = t.message
             }
         })
     }
